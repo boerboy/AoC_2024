@@ -1,0 +1,8 @@
+[package]
+name = "day_2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+csv = "1"
+itertools = "0.13.0"
