@@ -15,7 +15,7 @@ fn read_csv() -> Result<Vec<Vec<i32>>, Box<dyn Error>> {
     for result in rdr.records() {
         let record = result?
             .iter()
-            .flat_map(|x| { x.parse::<i32>().map_err(|_| "Failed to parse string as i64") })
+            .flat_map(|x| { x.parse::<i32>().map_err(|_| "Failed to parse string as i32") })
             .collect_vec();
         result_list.push(record);
     }
