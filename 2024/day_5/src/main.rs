@@ -119,5 +119,5 @@ fn handle_parts() -> Result<(), Box<dyn Error>> {
 }
 
 fn main() {
-    let _ = handle_parts().expect("Error during exercise");
+    let _ = handle_parts().expect("Should successfully run exercise");
 }
