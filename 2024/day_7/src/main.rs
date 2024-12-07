@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::fs::File;
 use std::i64;
+use std::time::Instant;
 use itertools::Itertools;
+use rayon::prelude::*;
 
-fn read_csv() -> Result<Vec<(i64,Vec<i64>)>, Box<dyn Error>> {
+fn read_csv() -> Result<Vec<(i64, Vec<i64>)>, Box<dyn Error>> {
     let file = File::open("./resources/input.csv")?;
     let mut rdr = csv::ReaderBuilder::new()
         .delimiter(b' ')
@@ -57,12 +59,14 @@ fn main() {
 
     println!("Part 1: {}", part_1);
 
-
+    let start = Instant::now();
+    // Code to measure
     let part_2: i64 = input
-        .iter()
+        .par_iter()
         .map(|x| calibrate(x, 3))
         .sum();
 
     println!("Part 2: {}", part_2);
-
+    let duration = start.elapsed();
+    println!("Time taken: {:?}", duration)
 }
