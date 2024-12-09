@@ -4,7 +4,7 @@ use std::fs::File;
 use itertools::Itertools;
 
 fn read_csv() -> Result<Vec<Vec<char>>, Box<dyn Error>> {
-    let file = File::open("./resources/test.csv")?;
+    let file = File::open("./resources/input.csv")?;
     let mut rdr = csv::ReaderBuilder::new()
         .delimiter(b' ')
         .has_headers(false)
@@ -26,18 +26,11 @@ fn read_csv() -> Result<Vec<Vec<char>>, Box<dyn Error>> {
 fn find_diffs(coords_1: (i32, i32), coords_2: (i32, i32)) -> (i32, i32) {
     let (x_1, y_1) = coords_1;
     let (x_2, y_2) = coords_2;
-    (x_2 - x_1, y_2 - y_1)
+    (x_1 - x_2, y_1 - y_2)
 }
 
-fn find_y_intersect(coords_1: (i32, i32), m: f32) -> f32 {
-    coords_1.1 as f32 - (m * coords_1.0 as f32)
-}
-
-fn build_graph_function(coords_1: (i32, i32), coords_2: (i32, i32)) -> impl Fn(i32) -> f32 {
-    let diffs = find_diffs(coords_1, coords_2);
-    let m = diffs.1 as f32 / diffs.0 as f32;
-    let c = find_y_intersect(coords_1, m);
-    move |x| m * x as f32 + c
+fn add_diffs(coords: (i32, i32), diffs:(i32, i32)) ->  (i32, i32) {
+    (coords.0 + diffs.0 , coords.1 + diffs.1)
 }
 
 
@@ -45,18 +38,7 @@ fn is_within_map(col: i32, col_count: usize, row: i32, row_count: usize) -> bool
     col < col_count as i32 && row < row_count as i32 && col >= 0 && row >= 0
 }
 
-fn fetch_next_coords(coords: Option<(i32, i32)>, graph: impl Fn(i32) -> f32) -> Option<(i32, i32)> {
-    coords.iter().flat_map(|x| {
-        let y = graph(x.0 + 1);
-        if y.fract() == 0f32 {
-            Some((x.0 + 1, y as i32))
-        } else {
-            None
-        }
-    }).next()
-}
-
-fn find_antinodes(antenna_map: &Vec<Vec<char>>, mut resonance: bool) -> Vec<(i32, i32)> {
+fn find_antinodes(antenna_map: &Vec<Vec<char>>, resonance: bool) -> Vec<(i32, i32)> {
     let (row_count, col_count) = (antenna_map.iter().count(), antenna_map.get(0).unwrap_or(&Vec::<char>::new()).iter().count());
 
     HashSet::<(i32, i32)>::from_iter(
@@ -79,32 +61,13 @@ fn find_antinodes(antenna_map: &Vec<Vec<char>>, mut resonance: bool) -> Vec<(i32
                                 if diffs.0 == 0 && diffs.1 == 0 {
                                     vec![]
                                 } else {
-                                    let graph = build_graph_function(*coords_1, *coords_2);
-                                    let mut inner_coords_1: Option<(i32, i32)> = if resonance {
-                                        fetch_next_coords(Some(*coords_2), &graph)
-                                    } else {
-                                        Some((coords_1.0 - diffs.0, coords_1.1 - diffs.1))
-                                    };
-                                    let mut inner_coords_2: Option<(i32, i32)> = if resonance {
-                                        fetch_next_coords(Some(*coords_1), &graph)
-                                    } else {
-                                        Some((coords_2.0 + diffs.0, coords_2.1 + diffs.1))
-                                    };
-                                    loop {
-                                        let other: Vec<(i32, i32)> = vec![
-                                            inner_coords_1,
-                                            inner_coords_2
-                                        ].iter().flatten().copied().collect();
-                                        if other.iter().all(|(x, y)| !is_within_map(*x, col_count, *y, row_count)) {
-                                            resonance = false
-                                        }
-                                        antinode_list.extend(other);
-
-                                        if !resonance { break; }
-                                        inner_coords_1 = fetch_next_coords(inner_coords_1, &graph);
-                                        inner_coords_2 = fetch_next_coords(inner_coords_2, &graph);
+                                    let mut inner_coords: (i32, i32) = *coords_1;
+                                    while is_within_map(inner_coords.0, col_count, inner_coords.1, row_count) && resonance {
+                                        antinode_list.push(inner_coords);
+                                        inner_coords = add_diffs(inner_coords, diffs);
                                     }
-
+                                    inner_coords = add_diffs(inner_coords, diffs);
+                                    antinode_list.push(inner_coords);
                                     antinode_list
                                 }
                             })
@@ -112,7 +75,7 @@ fn find_antinodes(antenna_map: &Vec<Vec<char>>, mut resonance: bool) -> Vec<(i32
             })
     )
         .iter()
-        .filter(|(x, y)| is_within_map(*x, col_count, *y, row_count))
+        .filter(|(x, y)| is_within_map(*x , col_count, *y, row_count))
         .map(|x| *x)
         .collect_vec()
 }
