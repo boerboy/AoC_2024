@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 csv = "1"
+common = { version = "0.1.0", path = "../common" }
