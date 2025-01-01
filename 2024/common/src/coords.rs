@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Coords {
     pub x: i64,
@@ -46,6 +44,9 @@ impl Coords {
 
     pub fn add_const(&self, constant: i64) -> Coords {
         Coords { x: self.x + constant, y:  self.y + constant }
+    }
+    pub fn is_outside_bounds(&self, max_x: i32, max_y: i32) -> bool {
+        self.x < 0 || self.x > max_x as i64 || self.y < 0 || self.y > max_y as i64
     }
 
 }
