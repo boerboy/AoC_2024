@@ -1,5 +1,6 @@
 use crate::coords::Coords;
 
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Grid<T> {
     pub inner: Vec<Vec<T>>
 }
