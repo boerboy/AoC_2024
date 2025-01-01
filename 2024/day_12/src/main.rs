@@ -8,23 +8,34 @@ struct AccumulatorDetails {
 }
 
 fn accumulate_area_and_perimeter(input: &Grid<char>, details: AccumulatorDetails) -> (i32, i32) {
-    let surrounding_count = input.look_for_by_coords_delta(details.coords, details.crop, &Coords::CARDINALS).iter().count();
+    let surrounding_count = input
+        .look_for_by_coords_delta(details.coords, details.crop, &Coords::CARDINALS)
+        .iter()
+        .count();
     (4 - surrounding_count as i32, 1)
 }
 
 fn accumulate_sides_and_area(input: &Grid<char>, details: AccumulatorDetails) -> (i32, i32) {
-    Coords::RIGHT_ANGLES.iter().fold((1, 0), |(area, sides), (longitudinal, latitudinal, diagonal)| {
-        let x = input.fetch_by_delta(details.coords, longitudinal).map(|x| *x);
-        let y =  input.fetch_by_delta(details.coords, latitudinal).map(|x| *x);
-        let z =  input.fetch_by_delta(details.coords, diagonal).map(|x| *x);
-        if x != Some(details.crop) && y != Some(details.crop) {
-            (area, sides + 1)
-        }  else if x == Some(details.crop) && y == Some(details.crop) && z != Some(details.crop){
-            (area, sides + 1)
-        } else {
-            (area, sides)
-        }
-    })
+    Coords::RIGHT_ANGLES.iter().fold(
+        (1, 0),
+        |(area, sides), (longitudinal, latitudinal, diagonal)| {
+            let x = input
+                .fetch_by_delta(details.coords, longitudinal)
+                .map(|x| *x);
+            let y = input
+                .fetch_by_delta(details.coords, latitudinal)
+                .map(|x| *x);
+            let z = input.fetch_by_delta(details.coords, diagonal).map(|x| *x);
+            if x != Some(details.crop) && y != Some(details.crop) {
+                (area, sides + 1)
+            } else if x == Some(details.crop) && y == Some(details.crop) && z != Some(details.crop)
+            {
+                (area, sides + 1)
+            } else {
+                (area, sides)
+            }
+        },
+    )
 }
 
 fn create_visited_grid<T>(input: &Grid<T>) -> Grid<bool> {
@@ -41,12 +52,18 @@ fn traverse_region<F>(
     input: &Grid<char>,
     visited: &mut Grid<bool>,
     details: AccumulatorDetails,
-    accumulator: &F
+    accumulator: &F,
 ) -> i32
 where
     F: Fn(&Grid<char>, AccumulatorDetails) -> (i32, i32),
 {
-    fn inner<F>(i: &Grid<char>, v: &mut Grid<bool>, d: AccumulatorDetails, f: &F, acc: (i32, i32)) -> (i32, i32)
+    fn inner<F>(
+        i: &Grid<char>,
+        v: &mut Grid<bool>,
+        d: AccumulatorDetails,
+        f: &F,
+        acc: (i32, i32),
+    ) -> (i32, i32)
     where
         F: Fn(&Grid<char>, AccumulatorDetails) -> (i32, i32),
     {
@@ -54,18 +71,24 @@ where
             acc
         } else {
             v.update(d.coords, true);
-            
+
             let (surrounding_factor, surrounding_other_factor) = i
                 .look_for_by_coords_delta(d.coords, d.crop, &Coords::CARDINALS)
                 .iter()
                 .fold((0, 0), |(factor_0, other_factor_0), coords| {
-                    let details = AccumulatorDetails { coords: *coords, crop: d.crop};
+                    let details = AccumulatorDetails {
+                        coords: *coords,
+                        crop: d.crop,
+                    };
                     let (inner_factor, inner_other_factor) = inner(i, v, details, f, acc);
                     (factor_0 + inner_factor, other_factor_0 + inner_other_factor)
                 });
             let (factor, other_factor) = acc;
             let (factor_0, other_factor_0) = f(i, d);
-            (factor + factor_0 + surrounding_factor, other_factor + other_factor_0 + surrounding_other_factor)
+            (
+                factor + factor_0 + surrounding_factor,
+                other_factor + other_factor_0 + surrounding_other_factor,
+            )
         }
     }
     let (factor, other_factor) = inner(input, visited, details, accumulator, (0, 0));
