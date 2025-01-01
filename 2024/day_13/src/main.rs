@@ -33,7 +33,7 @@ fn get_input(input: &str) -> Result<Vec<GameDetails>, Box<dyn Error>> {
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 struct GameDetails { button_a: Coords, button_b: Coords, prize: Coords }
 
-
+// Greatest common divisor
 fn find_solution(
     button_a: Coords,
     button_b: Coords,

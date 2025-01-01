@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use crate::coords::Coords;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
