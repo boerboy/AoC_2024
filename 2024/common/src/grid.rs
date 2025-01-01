@@ -19,8 +19,8 @@ where
                 value.iter().enumerate().flat_map(move |(x, value)| {
                     if *value == search_char {
                         Some(Coords {
-                            x: x as i32,
-                            y: y as i32,
+                            x: x as i64,
+                            y: y as i64,
                         })
                     } else {
                         None
@@ -53,7 +53,7 @@ where
         deltas
             .iter()
             .flat_map(|delta| {
-                let next_coords = current_coords.subtract_other(*delta);
+                let next_coords = current_coords.subtract(*delta);
                 let value = &self.value_at(next_coords);
                 match value {
                     Some(x) if **x == search => Some(next_coords),
@@ -76,14 +76,14 @@ where
         deltas
             .iter()
             .flat_map(|delta| {
-                let next_coords = current_coords.subtract_other(*delta);
+                let next_coords = current_coords.subtract(*delta);
                 self.value_at(next_coords).map(|x|(next_coords,x))
             })
             .collect()
     }
 
     pub fn fetch_by_delta(&self, current_coords: Coords, delta: &Coords) -> Option<&T> {
-        let next_coords = current_coords.subtract_other(*delta);
+        let next_coords = current_coords.subtract(*delta);
         self.value_at(next_coords)
     }
 }

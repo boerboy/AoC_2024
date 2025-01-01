@@ -1,10 +1,10 @@
+use std::cmp::Ordering;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Coords {
-    pub x: i32,
-    pub y: i32
+    pub x: i64,
+    pub y: i64
 }
-
 
 impl Coords {
     pub const NORTH: Coords = Coords {x: 0, y: -1};
@@ -36,7 +36,16 @@ impl Coords {
         (Coords::SOUTH, Coords::WEST, Coords::SOUTH_WEST)
     ];
 
-    pub fn subtract_other(&self, other: Coords) -> Coords {
+    pub fn subtract(&self, other: Coords) -> Coords {
         Coords { x: self.x - other.x, y: self.y - other.y }
     }
+
+    pub fn add(&self, other: Coords) -> Coords {
+        Coords { x: self.x + other.x, y: self.y + other.y }
+    }
+
+    pub fn add_const(&self, constant: i64) -> Coords {
+        Coords { x: self.x + constant, y:  self.y + constant }
+    }
+
 }
