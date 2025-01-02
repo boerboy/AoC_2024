@@ -1,5 +1,4 @@
 use std::fmt::{Debug, Display};
-use itertools::Itertools;
 use crate::coords::Coords;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -31,6 +30,10 @@ where
                 })
             })
             .collect()
+    }
+
+    pub fn find_one(&self, search_char: T) -> Option<Coords> {
+        self.find(search_char).get(0).map(|x|*x)
     }
 
     pub fn value_at_mut(&mut self, coords: Coords) -> Option<&mut T> {
@@ -84,6 +87,12 @@ where
             })
             .collect()
     }
+
+    pub fn fetch_at(&self, coords: Coords) -> Option<&T> {
+        self.inner.get(coords.y as usize).map(|row|row.get(coords.x as usize)).flatten()
+    }
+
+
 
     pub fn fetch_by_delta(&self, current_coords: Coords, delta: &Coords) -> Option<&T> {
         let next_coords = current_coords.subtract(*delta);
