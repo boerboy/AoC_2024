@@ -1,8 +1,11 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::hash::Hash;
 use common::coords::Coords;
 use common::reader::read_csv;
 use regex::Regex;
+use itertools::Itertools;
+use common::grid::Grid;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 struct RobotDetails {
@@ -21,8 +24,8 @@ fn parse_coords(re: &Regex, input: &String) -> Coords {
 }
 
 fn parse_input() -> Vec<RobotDetails> {
-    let re = &Regex::new(r".*(-?\d+),(-?\d+)").expect("Successful regex instantiation");
-    read_csv::<(String, String)>("./resources/test.csv", b' ')
+    let re = &Regex::new(r"(-?\d+),(-?\d+)").expect("Successful regex instantiation");
+    read_csv::<(String, String)>("./resources/input.csv", b' ')
         .expect("Successful input read")
         .iter()
         .map(|(position_str, velocity_str)| {
@@ -46,7 +49,6 @@ fn walk_robots(
             .position
             .add(details.velocity.multiply_const(seconds))
             .wrap(*bounds);
-
         *acc.entry(final_position).or_insert(0i64) += 1i64;
         acc
     })
@@ -70,10 +72,26 @@ fn calc_safety_factor(input: &Vec<RobotDetails>, seconds: i64, bounds: &Coords) 
     north_west * north_east * south_east * south_west
 }
 
+fn find_tree(input: &Vec<RobotDetails>, bounds: &Coords) -> () {
+    (0 .. 10000).for_each(|i| {
+        let mut grid: Grid<char> = Grid :: create_default(*bounds, '.');
+        let walked = walk_robots(input, i, bounds);
+        walked.iter().for_each(|(Coords  {x, y},  _)| grid.inner[*y as usize][*x as usize] = '*');
+        let string = grid.inner.iter().flat_map(|row| row.iter().map(|x|x.to_string())).join("");
+        if string.contains("*******************************"){
+            grid.pretty_print();
+            println!("Part 2: {:?}", i);
+        }
+    });
+}
+
 fn main() {
     let input = &parse_input();
-    let part_1 = calc_safety_factor(input, 100, &Coords {x: 11, y: 7});
+    let bounds = &Coords {x: 101, y: 103};
+    let part_1 = calc_safety_factor(input, 100, bounds);
     println!("Part 1: {:?}", part_1);
-    let part_2 = 0;
-    println!("Part 2: {:?}", part_2)
+    find_tree(input, bounds);
 }
+
+
+

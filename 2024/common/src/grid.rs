@@ -1,3 +1,5 @@
+use std::fmt::{Debug, Display};
+use itertools::Itertools;
 use crate::coords::Coords;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -9,6 +11,8 @@ impl<T> Grid<T>
 where
     T: PartialEq,
     T: Copy,
+    T: Debug,
+    T: Display
 {
     pub fn find(&self, search_char: T) -> Vec<Coords> {
         self.inner
@@ -84,5 +88,20 @@ where
     pub fn fetch_by_delta(&self, current_coords: Coords, delta: &Coords) -> Option<&T> {
         let next_coords = current_coords.subtract(*delta);
         self.value_at(next_coords)
+    }
+
+    pub fn create_default(bounds: Coords, default: T) -> Grid<T> {
+        Grid {
+            inner: (0..bounds.y).map(|_| {
+                (0..bounds.x).map(|_|default).collect()
+            }).collect()
+        }
+    }
+
+    pub fn pretty_print(&self) -> () {
+        self.inner.iter().for_each(|row| {
+            row.iter().for_each(|value| print!("{}", value));
+            println!()
+        })
     }
 }

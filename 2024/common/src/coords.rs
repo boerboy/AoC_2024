@@ -64,4 +64,8 @@ impl Coords {
         self.x < 0 || self.x > max_x as i64 || self.y < 0 || self.y > max_y as i64
     }
 
+    pub fn neighbors(&self) -> Vec<Coords> {
+        Coords::CARDINALS.iter().map(|d| self.add(*d)).collect()
+    }
+
 }
