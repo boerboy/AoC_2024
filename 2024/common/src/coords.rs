@@ -42,8 +42,23 @@ impl Coords {
         Coords { x: self.x + other.x, y: self.y + other.y }
     }
 
+    pub fn multiply(&self, other: Coords) -> Coords {
+        Coords { x: self.x * other.x, y: self.y * other.y }
+    }
+
+    pub fn wrap(&self, bounds: Coords) -> Coords {
+        Coords {
+            x: self.x.rem_euclid(bounds.x),
+            y: self.y.rem_euclid(bounds.y),
+        }
+    }
+
     pub fn add_const(&self, constant: i64) -> Coords {
         Coords { x: self.x + constant, y:  self.y + constant }
+    }
+
+    pub fn multiply_const(&self, constant: i64) -> Coords {
+        Coords { x: self.x * constant, y:  self.y * constant }
     }
     pub fn is_outside_bounds(&self, max_x: i32, max_y: i32) -> bool {
         self.x < 0 || self.x > max_x as i64 || self.y < 0 || self.y > max_y as i64
