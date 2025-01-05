@@ -13,17 +13,39 @@ where
     T: Debug,
     T: Display
 {
-    pub fn find(&self, search_char: T) -> Vec<Coords> {
+    pub fn find(&self, search_value: T) -> Vec<Coords> {
         self.inner
             .iter()
             .enumerate()
             .flat_map(|(y, value)| {
                 value.iter().enumerate().flat_map(move |(x, value)| {
-                    if *value == search_char {
+                    if *value == search_value {
                         Some(Coords {
                             x: x as i64,
                             y: y as i64,
                         })
+                    } else {
+                        None
+                    }
+                })
+            })
+            .collect()
+    }
+
+    pub fn find_predicate_preserve<F>(&self, search_fn: F) -> Vec<(&T, Coords)>
+    where
+        F: Copy,
+        F: Fn(&T) -> bool {
+        self.inner
+            .iter()
+            .enumerate()
+            .flat_map(|(y, value)| {
+                value.iter().enumerate().flat_map(move |(x, value)| {
+                    if search_fn(value) {
+                        Some((value, Coords {
+                            x: x as i64,
+                            y: y as i64,
+                        }))
                     } else {
                         None
                     }
